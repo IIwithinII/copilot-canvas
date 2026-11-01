@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f2f1e9">
+  <title>Student outcomes | Fieldnotes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f2f1e9;
+      --surface: #fbfaf6;
+      --ink: #1d2924;
+      --muted: #78827a;
+      --line: #dedfd5;
+      --green: #245c45;
+      --lime: #d3eb81;
+      --coral: #e27b5e;
+      --blue: #8ba9ce;
+      --serif: Georgia, 'Times New Roman', serif;
+      --sans: 'Avenir Next', Avenir, 'Segoe UI', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.45 var(--sans); }
+    button, select, input { font: inherit; }
+    button, select { color: inherit; }
+    .shell { max-width: 1440px; margin: 0 auto; padding: 0 42px 52px; }
+    .topbar { height: 72px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+    .brand-mark { width: 23px; height: 23px; display: grid; place-items: center; background: var(--green); color: var(--lime); border-radius: 50%; font: 15px var(--serif); }
+    .source { color: var(--muted); font-size: 12px; }
+    .intro { padding: 37px 0 27px; display: flex; align-items: end; justify-content: space-between; gap: 20px; }
+    .eyebrow { color: var(--green); text-transform: uppercase; letter-spacing: .13em; font-weight: 700; font-size: 10px; }
+    h1 { margin: 6px 0 5px; font: 42px/1.05 var(--serif); font-weight: 400; letter-spacing: 0; }
+    .subtitle { margin: 0; color: var(--muted); }
+    .upload { display: inline-flex; align-items: center; gap: 9px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 650; white-space: nowrap; }
+    .upload:hover { border-color: var(--green); }
+    .upload svg { width: 15px; height: 15px; }
+    #fileInput { display: none; }
+    .filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; padding: 15px 16px; border: 1px solid var(--line); border-radius: 5px; background: #eaeae1; }
+    .filter { display: grid; gap: 5px; min-width: 145px; }
+    .filter label { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .filter select, .filter input { height: 36px; border: 1px solid #d6d8cf; border-radius: 3px; background: var(--surface); padding: 0 10px; outline: none; }
+    .filter select:focus, .filter input:focus { border-color: var(--green); }
+    .filter.search { flex: 1; min-width: 190px; }
+    .reset { height: 36px; border: 0; background: transparent; color: var(--green); font-weight: 700; cursor: pointer; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); margin: 16px 0; border: 1px solid var(--line); background: var(--surface); border-radius: 5px; }
+    .metric { min-height: 105px; padding: 17px 20px; border-right: 1px solid var(--line); }
+    .metric:last-child { border-right: 0; }
+    .metric-label { color: var(--muted); font-size: 11px; }
+    .metric-value { margin-top: 5px; font: 31px/1.1 var(--serif); }
+    .metric-note { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .charts { display: grid; grid-template-columns: 1fr 1.18fr; gap: 16px; }
+    .panel { min-width: 0; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); }
+    .panel-head { padding: 16px 18px 0; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .panel h2 { margin: 0; font: 19px/1.2 var(--serif); font-weight: 400; }
+    .panel-caption { color: var(--muted); font-size: 10px; }
+    .chart { min-height: 190px; padding: 16px 20px 19px; }
+    .outcome-row { display: grid; grid-template-columns: 72px 1fr 42px; align-items: center; gap: 10px; margin: 16px 0; font-size: 11px; }
+    .outcome-label { color: var(--muted); }
+    .track { height: 12px; overflow: hidden; background: #eeeee7; border-radius: 2px; }
+    .bar { height: 100%; min-width: 2px; border-radius: 2px; transition: width .3s ease; }
+    .outcome-value { text-align: right; font-variant-numeric: tabular-nums; }
+    .legend { display: flex; gap: 15px; color: var(--muted); font-size: 10px; }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .semester-chart { width: 100%; height: 143px; display: block; overflow: visible; }
+    .semester-chart text { font-family: var(--sans); fill: var(--muted); font-size: 10px; }
+    .table-panel { margin-top: 16px; }
+    .table-head { padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
+    .table-title { display: flex; align-items: baseline; gap: 10px; }
+    .table-title h2 { margin: 0; font: 19px var(--serif); font-weight: 400; }
+    .table-count { color: var(--muted); font-size: 11px; }
+    .download { padding: 7px 10px; border: 1px solid var(--line); border-radius: 3px; background: transparent; cursor: pointer; font-size: 11px; font-weight: 650; }
+    .download:hover { border-color: var(--green); }
+    .table-wrap { overflow: auto; max-height: 390px; }
+    table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: 11px; }
+    th { position: sticky; top: 0; z-index: 1; padding: 10px 14px; background: #f5f4ed; color: var(--muted); text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+    td { padding: 10px 14px; border-top: 1px solid #eeeee7; font-variant-numeric: tabular-nums; }
+    tbody tr:hover { background: #f7f7f0; }
+    .tag { display: inline-block; padding: 3px 7px; border-radius: 2px; font-size: 10px; }
+    .tag.Graduate { background: #e7f0d7; color: #35562c; }
+    .tag.Dropout { background: #f8e6df; color: #98513d; }
+    .tag.Enrolled { background: #e6ecf5; color: #496183; }
+    .empty { padding: 30px; text-align: center; color: var(--muted); }
+    .footnote { padding-top: 12px; color: var(--muted); font-size: 10px; }
+    @media (max-width: 760px) {
+      .shell { padding: 0 18px 36px; }
+      .topbar { height: 60px; }
+      .intro { padding: 28px 0 20px; align-items: start; }
+      h1 { font-size: 34px; }
+      .upload { padding: 9px; font-size: 0; }
+      .upload svg { width: 17px; height: 17px; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .metric:nth-child(2) { border-right: 0; }
+      .metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .metric { min-height: 92px; padding: 14px; }
+      .metric-value { font-size: 27px; }
+      .charts { grid-template-columns: 1fr; }
+      .filters { gap: 10px; }
+      .filter { flex: 1; min-width: calc(50% - 10px); }
+      .filter.search { min-width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">f</span> FIELDNOTES <span class="source" id="sourceName">/ dataset.csv</span></div>
+      <span class="source">STUDENT OUTCOMES · EXPLORER</span>
+    </header>
+    <main>
+      <section class="intro">
+        <div><div class="eyebrow">A closer look at the cohort</div><h1>Student outcomes</h1><p class="subtitle">Explore academic progress and student outcomes across the dataset.</p></div>
+        <label class="upload" for="fileInput"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M5 14v5h14v-5"/></svg><span>Upload a CSV</span></label>
+        <input id="fileInput" type="file" accept=".csv,text/csv">
+      </section>
+      <section class="filters" aria-label="Dataset filters">
+        <div class="filter"><label for="outcomeFilter">Outcome</label><select id="outcomeFilter"><option value="">All outcomes</option></select></div>
+        <div class="filter"><label for="courseFilter">Course code</label><select id="courseFilter"><option value="">All courses</option></select></div>
+        <div class="filter"><label for="ageFilter">Age at enrollment</label><select id="ageFilter"><option value="">All ages</option><option value="17-20">17–20</option><option value="21-25">21–25</option><option value="26-35">26–35</option><option value="36+">36+</option></select></div>
+        <div class="filter search"><label for="searchFilter">Search records</label><input id="searchFilter" type="search" placeholder="Search any value…"></div>
+        <button class="reset" id="resetFilters" type="button">Reset</button>
+      </section>
+      <section class="metrics" aria-label="Cohort summary">
+        <div class="metric"><div class="metric-label">Students in view</div><div class="metric-value" id="studentCount">—</div><div class="metric-note">matching current filters</div></div>
+        <div class="metric"><div class="metric-label">Graduation rate</div><div class="metric-value" id="graduateRate">—</div><div class="metric-note">of students in view</div></div>
+        <div class="metric"><div class="metric-label">Dropout rate</div><div class="metric-value" id="dropoutRate">—</div><div class="metric-note">of students in view</div></div>
+        <div class="metric"><div class="metric-label">Average age</div><div class="metric-value" id="averageAge">—</div><div class="metric-note">at enrollment</div></div>
+      </section>
+      <section class="charts">
+        <article class="panel">
+          <div class="panel-head"><h2>Outcome mix</h2><span class="panel-caption">Share of filtered students</span></div>
+          <div class="chart" id="outcomeChart"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><h2>Academic progress</h2><div class="legend"><span><i class="dot" style="background:var(--blue)"></i>Semester 1</span><span><i class="dot" style="background:var(--green)"></i>Semester 2</span></div></div>
+          <div class="chart" id="semesterChart"></div>
+        </article>
+      </section>
+      <section class="panel table-panel">
+        <div class="table-head"><div class="table-title"><h2>Student records</h2><span class="table-count" id="tableCount"></span></div><button class="download" id="downloadCsv" type="button">Download filtered CSV</button></div>
+        <div class="table-wrap" id="tableWrap"></div>
+      </section>
+      <div class="footnote">Course values are the numeric codes provided in the source file. Rates describe this dataset and are not forecasts.</div>
+    </main>
+  </div>
+  <script>
+    const outcomeColors = { Graduate: '#8cab61', Dropout: '#e27b5e', Enrolled: '#8ba9ce' };
+    const outcomeOrder = ['Graduate', 'Enrolled', 'Dropout'];
+    const displayColumns = [
+      ['Age at enrollment', 'Age'],
+      ['Course', 'Course code'],
+      ['Tuition fees up to date', 'Tuition current'],
+      ['Debtor', 'Debtor'],
+      ['Curricular units 1st sem (approved)', 'Sem 1 approved'],
+      ['Curricular units 2nd sem (approved)', 'Sem 2 approved'],
+      ['Curricular units 2nd sem (grade)', 'Sem 2 grade'],
+      ['Target', 'Outcome']
+    ];
+    let rows = [];
+    let headers = [];
+    let filteredRows = [];
+
+    function parseCsv(text) {
+      const matrix = [];
+      let row = [];
+      let field = '';
+      let quoted = false;
+      for (let index = 0; index < text.length; index += 1) {
+        const char = text[index];
+        if (quoted) {
+          if (char === '"' && text[index + 1] === '"') { field += '"'; index += 1; }
+          else if (char === '"') quoted = false;
+          else field += char;
+        } else if (char === '"') quoted = true;
+        else if (char === ',') { row.push(field); field = ''; }
+        else if (char === '\n') { row.push(field.replace(/\r$/, '')); matrix.push(row); row = []; field = ''; }
+        else field += char;
+      }
+      if (field.length || row.length) { row.push(field.replace(/\r$/, '')); matrix.push(row); }
+      return matrix;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+    }
+
+    function loadCsv(text, name) {
+      const matrix = parseCsv(text);
+      if (matrix.length < 2 || !matrix[0].includes('Target') || !matrix[0].includes('Age at enrollment')) {
+        alert('This CSV needs Target and Age at enrollment columns.');
+        return;
+      }
+      headers = matrix[0];
+      rows = matrix.slice(1).filter(values => values.length === headers.length).map(values => Object.fromEntries(headers.map((header, index) => [header, values[index]])));
+      if (!rows.length) { alert('No records found in this CSV.'); return; }
+      document.getElementById('sourceName').textContent = `/ ${name}`;
+      populateFilters();
+      render();
+    }
+
+    function populateFilters() {
+      const outcomeSelect = document.getElementById('outcomeFilter');
+      const courseSelect = document.getElementById('courseFilter');
+      outcomeSelect.innerHTML = '<option value="">All outcomes</option>' + [...new Set(rows.map(row => row.Target))].sort().map(value => `<option>${escapeHtml(value)}</option>`).join('');
+      courseSelect.innerHTML = '<option value="">All courses</option>' + [...new Set(rows.map(row => row.Course))].sort((a, b) => Number(a) - Number(b)).map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+    }
+
+    function getFilteredRows() {
+      const outcome = document.getElementById('outcomeFilter').value;
+      const course = document.getElementById('courseFilter').value;
+      const age = document.getElementById('ageFilter').value;
+      const query = document.getElementById('searchFilter').value.trim().toLowerCase();
+      return rows.filter(row => {
+        const ageValue = Number(row['Age at enrollment']);
+        const ageMatch = !age || (age === '36+' ? ageValue >= 36 : ageValue >= Number(age.split('-')[0]) && ageValue <= Number(age.split('-')[1]));
+        return (!outcome || row.Target === outcome) && (!course || row.Course === course) && ageMatch && (!query || Object.values(row).some(value => String(value).toLowerCase().includes(query)));
+      });
+    }
+
+    function average(data, key) {
+      const values = data.map(row => Number(row[key])).filter(Number.isFinite);
+      return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+    }
+
+    function renderMetrics(data) {
+      const count = data.length;
+      const countOutcome = target => data.filter(row => row.Target === target).length;
+      document.getElementById('studentCount').textContent = count.toLocaleString();
+      document.getElementById('graduateRate').textContent = count ? `${Math.round(countOutcome('Graduate') / count * 100)}%` : '—';
+      document.getElementById('dropoutRate').textContent = count ? `${Math.round(countOutcome('Dropout') / count * 100)}%` : '—';
+      document.getElementById('averageAge').textContent = count ? average(data, 'Age at enrollment').toFixed(1) : '—';
+    }
+
+    function renderOutcomeChart(data) {
+      const chart = document.getElementById('outcomeChart');
+      if (!data.length) { chart.innerHTML = '<div class="empty">No records match these filters.</div>'; return; }
+      const counts = Object.fromEntries(outcomeOrder.map(target => [target, data.filter(row => row.Target === target).length]));
+      chart.innerHTML = outcomeOrder.map(target => {
+        const count = counts[target] || 0;
+        const percent = count / data.length * 100;
+        return `<div class="outcome-row"><span class="outcome-label">${target}</span><div class="track"><div class="bar" style="width:${percent}%;background:${outcomeColors[target]}"></div></div><span class="outcome-value">${Math.round(percent)}%</span></div>`;
+      }).join('');
+    }
+
+    function renderSemesterChart(data) {
+      const chart = document.getElementById('semesterChart');
+      if (!data.length) { chart.innerHTML = '<div class="empty">No records match these filters.</div>'; return; }
+      const max = Math.max(1, ...data.map(row => Math.max(Number(row['Curricular units 1st sem (approved)']) || 0, Number(row['Curricular units 2nd sem (approved)']) || 0)));
+      const width = 520;
+      const groupGap = width / outcomeOrder.length;
+      const baseline = 112;
+      const barWidth = 28;
+      const scale = 86 / max;
+      const groups = outcomeOrder.map((target, index) => {
+        const cohort = data.filter(row => row.Target === target);
+        const first = average(cohort, 'Curricular units 1st sem (approved)');
+        const second = average(cohort, 'Curricular units 2nd sem (approved)');
+        const x = groupGap * index + groupGap / 2;
+        const firstHeight = first * scale;
+        const secondHeight = second * scale;
+        return `<rect x="${x - barWidth - 3}" y="${baseline - firstHeight}" width="${barWidth}" height="${firstHeight}" rx="2" fill="#8ba9ce"><title>${target}, semester 1: ${first.toFixed(1)} approved units</title></rect><rect x="${x + 3}" y="${baseline - secondHeight}" width="${barWidth}" height="${secondHeight}" rx="2" fill="#245c45"><title>${target}, semester 2: ${second.toFixed(1)} approved units</title></rect><text x="${x}" y="133" text-anchor="middle">${target}</text>`;
+      }).join('');
+      chart.innerHTML = `<svg class="semester-chart" viewBox="0 0 ${width} 143" role="img" aria-label="Average approved units by outcome for semesters one and two"><line x1="12" y1="${baseline}" x2="${width - 12}" y2="${baseline}" stroke="#dedfd5"/>${groups}</svg>`;
+    }
+
+    function renderTable(data) {
+      const shown = data.slice(0, 100);
+      document.getElementById('tableCount').textContent = `${data.length.toLocaleString()} records${data.length > shown.length ? ' · showing first 100' : ''}`;
+      const head = displayColumns.map(([, label]) => `<th>${label}</th>`).join('');
+      const body = shown.map(row => `<tr>${displayColumns.map(([key]) => {
+        const value = row[key];
+        if (key === 'Target') return `<td><span class="tag ${escapeHtml(value)}">${escapeHtml(value)}</span></td>`;
+        if (key.includes('grade')) return `<td>${Number(value).toFixed(2)}</td>`;
+        return `<td>${escapeHtml(value)}</td>`;
+      }).join('')}</tr>`).join('');
+      document.getElementById('tableWrap').innerHTML = data.length ? `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>` : '<div class="empty">No records match these filters.</div>';
+    }
+
+    function render() {
+      filteredRows = getFilteredRows();
+      renderMetrics(filteredRows);
+      renderOutcomeChart(filteredRows);
+      renderSemesterChart(filteredRows);
+      renderTable(filteredRows);
+    }
+
+    ['outcomeFilter', 'courseFilter', 'ageFilter'].forEach(id => document.getElementById(id).addEventListener('change', render));
+    document.getElementById('searchFilter').addEventListener('input', render);
+    document.getElementById('resetFilters').addEventListener('click', () => {
+      document.getElementById('outcomeFilter').value = '';
+      document.getElementById('courseFilter').value = '';
+      document.getElementById('ageFilter').value = '';
+      document.getElementById('searchFilter').value = '';
+      render();
+    });
+    document.getElementById('fileInput').addEventListener('change', event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => loadCsv(String(reader.result), file.name);
+      reader.readAsText(file);
+      event.target.value = '';
+    });
+    document.getElementById('downloadCsv').addEventListener('click', () => {
+      const csv = [headers, ...filteredRows.map(row => headers.map(header => row[header]))].map(values => values.map(value => `"${String(value ?? '').replace(/"/g, '""')}"`).join(',')).join('\r\n');
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      link.download = 'filtered-student-outcomes.csv';
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+
+    fetch('dataset.csv').then(response => {
+      if (!response.ok) throw new Error('dataset.csv could not be loaded');
+      return response.text();
+    }).then(text => loadCsv(text, 'dataset.csv')).catch(() => {
+      document.getElementById('tableWrap').innerHTML = '<div class="empty">Upload a CSV file to begin exploring.</div>';
+      document.getElementById('outcomeChart').innerHTML = '<div class="empty">Upload a CSV file to see outcome mix.</div>';
+      document.getElementById('semesterChart').innerHTML = '<div class="empty">Upload a CSV file to see academic progress.</div>';
+    });
+  </script>
+</body>
+</html>
